@@ -1,0 +1,27 @@
+{
+  "name": "animucalendar",
+  "version": "0.0.1",
+  "description": "A web application that utilises a user's Anilist to develop an ical file they can import into their calendar applications.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blanky/animucalendar.git"
+  },
+  "author": "blanky",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/blanky/animucalendar/issues"
+  },
+  "homepage": "https://github.com/blanky/animucalendar#readme",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "bootstrap": "^3.3.7",
+    "express": "^4.14.0",
+    "morgan": "^1.7.0",
+    "nani": "^1.2.0",
+    "request": "^2.74.0"
+  }
+}
