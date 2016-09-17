@@ -1,11 +1,25 @@
 var global_test = {};
 var anime_list = [];
 $(document).ready(function() {
+  //clear caching
+  $('#submit-button').removeAttr("disabled");
+  //enable carousel
   $('.carousel').carousel({
     interval: false
   });
+  //make pressing enter in input box have desired behaviour
+  $('#username-input').keyup(function(event) {
+    if(event.keyCode == 13) {
+      $('#submit-button').click();
+    }
+  });
+  //disable native form behavious
+  $('#input-form').submit(function() {
+    return false;
+  });
   $('#submit-button').click(function() {
-    //$('#submit-button').text("Loading...");
+    $('#submit-button').html("<img src=\"files/loading.gif\" >");
+    $('#submit-button').attr("disabled", "disabled");
     $.post('/username', $('#input-form').serialize())
       .done(function(data, textStatus) {
         console.log(textStatus);
@@ -37,8 +51,10 @@ $(document).ready(function() {
             + '</p></div>');
         });
         $('#second-screen').append('<div class=\"col-sm-12 bottom-container\">'
+          + '<div class=\"col-sm-11\" id=\"loading-div\"><p id=\"progress-text\"></p></div>'
+          + '<div class=\"col-sm-1\" id=\"button-div\">'
           + '<button type=\"button\" class=\"btn btn-default\" id=\"stagetwo-button\">'
-          + 'Next</btn></div>'
+          + 'Next</btn></div></div>'
         );
         $('.p-div').click(function() {
           var elem = $(this);
@@ -61,6 +77,7 @@ $(document).ready(function() {
               $.post('/anime', payload)
                 .done(function(data, textStatus) {
                   countAnime++;
+                  $('#progress-text').text(countAnime.toString() + '/' + numAnime.toString());
                   console.log(countAnime.toString() + '/' + numAnime.toString());
                   anime_list.push(data);
                   if(countAnime == numAnime) {
@@ -75,12 +92,17 @@ $(document).ready(function() {
           });
           if(numAnime == 0) {
             alert("Please select some anime.");
+          } else {
+            $('#progress-text').text(countAnime.toString() + '/' + numAnime.toString());
+            $('#stagetwo-button').html("<img src=\"files/loading.gif\" >");
+            $('#stagetwo-button').attr("disabled", "disabled");
           }
         });
       })
       .fail(function(jqxhr, textStatus) {
         console.log(textStatus);
-        //$('#submit-button').text("Submit");
+        $('#submit-button').text("Submit");
+        $('#submit-button').removeAttr("disabled");
         console.log(jqxhr.status);
       }); 
   });
