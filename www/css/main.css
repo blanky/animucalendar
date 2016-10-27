@@ -60,7 +60,7 @@ body {
 	height:inherit;
 }
 
-.col-sm-4 {
+.col-sm-3 {
 	text-align:center;
 	display:inline-block;
 }
@@ -68,7 +68,6 @@ body {
 .preview-divs {
 	height:180px;
 	min-width:150px;
-	max-width:250px;
 	padding-top:15px;
 	padding-bottom:15px;
 }
@@ -79,9 +78,18 @@ body {
 }
 
 .p-div {
-	background-color:#dddddd;
+	background-color:#fff;
 	cursor:pointer;
 	min-width:120px;
+	max-width:250px;
+	display:inline-block;
+	min-height:170px;
+	border:1px solid gray;
+	border-radius:2%;
+}
+
+.p-div:hover {
+	background-color:#ddd;
 }
 
 .bottom-container {
@@ -94,4 +102,18 @@ body {
 
 #loading-div {
 	text-align:right;
+}
+
+.caption {
+	display:block;
+}
+
+.selected {
+	background-color:#64dd6e;
+	color:#2e8b57;
+	border-color:#2e8b57;
+}
+
+.selected:hover {
+	background-color:#54dd64;
 }

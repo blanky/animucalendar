@@ -44,11 +44,11 @@ $(document).ready(function() {
           }
         });
         curr_airing.forEach(function(cV) {
-          $('#second-screen').append('<div class=\"col-sm-4 preview-divs\"><p class=\"p-div\" data-id=\"'
+          $('#second-screen').append('<div class=\"col-sm-3 preview-divs\"><div class=\"p-div col-sm-12\" data-id=\"'
             + cV.id.toString() + '\">'
-            + '<img class=\"img-thumbs\" src=' + cV.image_url_med + '><br>'
-            + cV.title_english
-            + '</p></div>');
+            + '<img class=\"img-thumbs\" src=' + cV.image_url_lge + ' />'
+            + '<span class=\"caption\">' + cV.title_english + '</span>'
+            + '</div></div>');
         });
         $('#second-screen').append('<div class=\"col-sm-12 bottom-container\">'
           + '<div class=\"col-sm-11\" id=\"loading-div\"><p id=\"progress-text\"></p></div>'
@@ -58,30 +58,44 @@ $(document).ready(function() {
         );
         $('.p-div').click(function() {
           var elem = $(this);
-          if(elem.css('background-color') === 'rgb(221, 221, 221)') {
-            elem.css('background-color', 'rgb(0, 221, 0)');
+          if(elem.hasClass('selected')) {
+            elem.removeClass('selected');
           } else {
-            elem.css('background-color', 'rgb(221, 221, 221)');
+            elem.addClass('selected');
           }
         });
-        $('#second-screen').scrollTop();
-        //$('#second-screen').text(curr_airing.toString());
         $('.carousel').carousel(1);
+        $('#second-screen').scrollTop();
         $('#stagetwo-button').click(function() {
           var numAnime = 0;
           var countAnime = 0;
           $('.p-div').each(function() {
-            if($(this).css('background-color') === 'rgb(0, 221, 0)') {
+            if($(this).hasClass('selected')) {
               var payload = 'anime_id=' + $(this).data('id').toString();
               numAnime++;
               $.post('/anime', payload)
                 .done(function(data, textStatus) {
                   countAnime++;
                   $('#progress-text').text(countAnime.toString() + '/' + numAnime.toString());
-                  console.log(countAnime.toString() + '/' + numAnime.toString());
                   anime_list.push(data);
                   if(countAnime == numAnime) {
                     console.log("To page 3!");
+										console.log(develop_vcal());
+                    $('#third-screen').append("<h3>Select your timezone</h3><br>"
+                      + "<select id=\"tz-select\"></select><br><br>"
+                      + "<button type=\"button\" class=\"btn btn-default\" id=\"third-button\">"
+                      + "Submit</button>"
+                    );
+										//Create a blob = new Blob([], {type:"octet/stream"})
+										//a element with attributes:
+										//href = window.URL.createObjectURL(blob)
+										//download = "anime.ics"
+										//class = btn btn-primary
+										//error list before download button if errors (null stuff)
+										//warning about possible inaccuracy:
+										// assumptions like no breaks in between seasons
+										//the next airing episode is the regular scheduled time
+										//there are no ads if duration applicable
                     $('.carousel').carousel(2);
                   }
                 })
@@ -109,3 +123,63 @@ $(document).ready(function() {
 });
 
 
+function develop_vcal() {
+	var vcal = '';
+	vcal += 'BEGIN:VCALENDAR\r\n';
+	vcal += 'VERSION:2.0\r\n';
+	vcal += 'CALSCALE:GREGORIAN\r\n';
+	vcal += 'PRODID:Anical\r\n';
+	for(var i = 0; i < anime_list.length; i++) {
+		vcal += develop_anime_events(anime_list[i]);
+	}
+	vcal += 'END:VCALENDAR\r\n\n';
+	return vcal;
+}
+
+function develop_anime_events(animeObj) {
+	var animeEvents = '';
+	//if animeObj.airing === null, return empty string
+	if(animeObj.airing !== null) {
+		//animeObj.airing.time (YYYY-MM-DDTHH:MM:SS+HH:MM) (if null, return empty string)
+		if(animeObj.airing.time === null || animeObj.airing.time === '') {
+			return animeEvents;
+		}
+		var nextAiringMoment = moment(animeObj.airing.time);
+		//animeObj.airing.next_episode (if null, asusme 1)
+		var nextEpisode = animeObj.airing.next_episode;
+		if(nextEpisode === null) {
+			nextEpisode = 1;
+		}
+		//animeObj.duration (if null or 0, assume 15 if animeObj.type === 'TV Short', else assume 30)
+		var duration = animeObj.duration;
+		if(duration === 0 || duration === null) {
+			if(animeObj.type === "TV Short") {
+				duration = 15;
+			} else {
+				duration = 30;
+			}
+		}
+		//animeObj.total_episodes (if null or 0, assume (epNum/12+1)*12)
+		var totalEps = animeObj.total_episodes;
+		if(totalEps === null || totalEps === 0) {
+			totalEps = (parseInt(nextEpisode/12)+1)*12;
+		}
+		for(var i = nextEpisode; i <= totalEps; i++) {
+			animeEvents += develop_vevent(nextAiringMoment.add(7, 'd'), duration, animeObj.title_english + ' - ' + i.toString());
+		}
+	}
+	return animeEvents;
+}
+
+function develop_vevent(startTime, duration, summary) {
+	var event = '';
+	event += 'BEGIN:VEVENT\r\n';
+	event += 'UID:' + startTime.format() + '-' + summary.replace(/ /gi, '-') + '@' + window.location.hostname + '\r\n';
+	event += 'DTSTAMP:' + moment().format('YYYYMMDDTHHmmss') + '\r\n';
+	event += 'DTSTART;TZID=Asia/Tokyo:' + startTime.tz('Asia/Tokyo').format('YYYYMMDDTHHmmss') + '\r\n';
+	event += 'DTEND;TZID=Asia/Tokyo:' + startTime.add(duration, 'm').tz('Asia/Tokyo').format('YYYYMMDDTHHmmss') + '\r\n';
+	startTime.subtract(duration, 'm');
+	event += 'SUMMARY:' + summary + '\r\n';
+	event += 'END:VEVENT\r\n'
+	return event;
+}
