@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 
 var credentials = require('./js/credentials');
 
+var PORT = 8080;
 var app = express();
 nani.init(credentials.client_id, credentials.client_secret);
 
@@ -49,8 +50,8 @@ app.use('*', function(req, res) {
   res.status(404).send("Not found");
 });
 
-app.listen(4000, function() {
-  console.log("Server is listening on port 4000.");
+app.listen(PORT, function() {
+  console.log(`Server is listening on port ${PORT}.`);
 });
 
 

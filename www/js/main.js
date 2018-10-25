@@ -1,5 +1,6 @@
 var global_test = {};
 var anime_list = [];
+var error_list = [];
 $(document).ready(function() {
   //clear caching
   $('#submit-button').removeAttr("disabled");
@@ -80,22 +81,17 @@ $(document).ready(function() {
                   anime_list.push(data);
                   if(countAnime == numAnime) {
                     console.log("To page 3!");
-										console.log(develop_vcal());
-                    $('#third-screen').append("<h3>Select your timezone</h3><br>"
-                      + "<select id=\"tz-select\"></select><br><br>"
-                      + "<button type=\"button\" class=\"btn btn-default\" id=\"third-button\">"
-                      + "Submit</button>"
-                    );
-										//Create a blob = new Blob([], {type:"octet/stream"})
-										//a element with attributes:
-										//href = window.URL.createObjectURL(blob)
-										//download = "anime.ics"
-										//class = btn btn-primary
-										//error list before download button if errors (null stuff)
-										//warning about possible inaccuracy:
-										// assumptions like no breaks in between seasons
-										//the next airing episode is the regular scheduled time
-										//there are no ads if duration applicable
+										var ical = new Blob([develop_vcal()], {type:"octet/stream"});
+										$('#download-btn').attr('href', window.URL.createObjectURL(ical));
+										$('#download-btn').attr('download', "anime.ics");
+										$('#download-btn').addClass('btn btn-lg btn-primary');
+										if(error_list.length !== 0) {
+											$('#error-declare').addClass('some-error');
+											$('#error-declare').removeClass('no-error');
+											error_list.forEach(function(animeObj) {
+												$('#error-list').append('<li>' + animeObj.title_english + '</li>');
+											});
+										}
                     $('.carousel').carousel(2);
                   }
                 })
@@ -142,6 +138,7 @@ function develop_anime_events(animeObj) {
 	if(animeObj.airing !== null) {
 		//animeObj.airing.time (YYYY-MM-DDTHH:MM:SS+HH:MM) (if null, return empty string)
 		if(animeObj.airing.time === null || animeObj.airing.time === '') {
+			error_list.push(animeObj);
 			return animeEvents;
 		}
 		var nextAiringMoment = moment(animeObj.airing.time);
@@ -165,8 +162,10 @@ function develop_anime_events(animeObj) {
 			totalEps = (parseInt(nextEpisode/12)+1)*12;
 		}
 		for(var i = nextEpisode; i <= totalEps; i++) {
-			animeEvents += develop_vevent(nextAiringMoment.add(7, 'd'), duration, animeObj.title_english + ' - ' + i.toString());
+			animeEvents += develop_vevent(nextAiringMoment.add((nextEpisode - i ? 7 : 0), 'd'), duration, animeObj.title_english + ' - ' + i.toString());
 		}
+	} else {
+		error_list.push(animeObj);
 	}
 	return animeEvents;
 }

@@ -117,3 +117,27 @@ body {
 .selected:hover {
 	background-color:#54dd64;
 }
+
+#third-screen {
+	text-align:center;
+}
+
+.no-error {
+	display:none;
+}
+
+.some-error {
+	display:inline-block;
+	border:1px solid #ffae19;
+	border-radius:1.5%;
+	color:#ffae19;
+	margin-bottom:10px;
+	padding-left:20px;
+	padding-right:20px;
+	text-align:left;
+	padding-top:2px;
+}
+
+#download-btn {
+	display:inline-block;
+}

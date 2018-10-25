@@ -17,10 +17,10 @@
   },
   "homepage": "https://github.com/blanky/animucalendar#readme",
   "dependencies": {
-    "body-parser": "^1.15.2",
+    "body-parser": "^1.18.3",
     "bootstrap": "^3.3.7",
     "express": "^4.14.0",
-    "morgan": "^1.7.0",
+    "morgan": "^1.9.0",
     "nani": "^1.2.0",
     "request": "^2.74.0"
   }
